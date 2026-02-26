@@ -106,14 +106,230 @@ If not defined, mass assignment may throw: `MassAssignmentException`
 4.  Has Many Through
 5.  Polymorphic
 
-### Example -- One to Many:
+
+### One to One Relationship
+
+### Scenario:
+
+Each User has one Profile.
+
+#### Tables
+
+users: - id - name - email
+
+profiles: - id - user_id - phone - address
+
+#### User Model
 
 ``` php
-public function posts()
+class User extends Model
 {
-    return $this->hasMany(Post::class);
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
 }
 ```
+
+#### Profile Model
+
+``` php
+class Profile extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+#### Usage
+
+``` php
+$user = User::with('profile')->find(1);
+echo $user->profile->phone;
+```
+
+------------------------------------------------------------------------
+
+### One to Many Relationship
+
+#### Scenario:
+
+One User has many Posts.
+
+#### Tables
+
+posts: - id - user_id - title - content
+
+#### User Model
+
+``` php
+class User extends Model
+{
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+}
+```
+
+#### Post Model
+
+``` php
+class Post extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+#### Usage
+
+``` php
+$user = User::with('posts')->find(1);
+
+foreach ($user->posts as $post) {
+    echo $post->title;
+}
+```
+
+------------------------------------------------------------------------
+
+### Many to Many Relationship
+
+#### Scenario:
+
+Users can have multiple Roles. Roles can belong to multiple Users.
+
+#### Pivot Table
+
+role_user: - user_id - role_id
+
+#### User Model
+
+``` php
+class User extends Model
+{
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+}
+```
+
+#### Role Model
+
+``` php
+class Role extends Model
+{
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+}
+```
+
+#### Operations
+
+Attach:
+
+``` php
+$user->roles()->attach($roleId);
+```
+
+Detach:
+
+``` php
+$user->roles()->detach($roleId);
+```
+
+Sync:
+
+``` php
+$user->roles()->sync([1, 2, 3]);
+```
+
+------------------------------------------------------------------------
+
+### Has Many Through
+
+#### Scenario:
+
+Country → Users → Posts
+
+#### Country Model
+
+``` php
+class Country extends Model
+{
+    public function posts()
+    {
+        return $this->hasManyThrough(Post::class, User::class);
+    }
+}
+```
+
+#### Usage
+
+``` php
+$country = Country::find(1);
+$posts = $country->posts;
+```
+
+------------------------------------------------------------------------
+
+### Polymorphic Relationship
+
+#### Scenario:
+
+Posts and Videos can have Comments.
+
+### comments table:
+
+-   id
+-   commentable_id
+-   commentable_type
+-   content
+
+### Comment Model
+
+``` php
+class Comment extends Model
+{
+    public function commentable()
+    {
+        return $this->morphTo();
+    }
+}
+```
+
+#### Post Model
+
+``` php
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+```
+
+#### Video Model
+
+``` php
+class Video extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+```
+
 
 ------------------------------------------------------------------------
 
