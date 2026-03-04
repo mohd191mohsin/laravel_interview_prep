@@ -1,4 +1,16 @@
 Laravel Service Container ek powerful dependency injection container hai jo classes ko manage aur resolve karta hai.
+```php
+Controller
+     ↓
+Needs Logger
+     ↓
+Service Container
+     ↓
+Create Logger Object
+     ↓
+Inject into Controller
+```
+
 Simple words me:
 ``` php
 Service Container ka kaam hai objects ko automatically create karna aur unki dependencies inject karna.
@@ -33,3 +45,4 @@ class UserController
     }
 }
 ```
+
